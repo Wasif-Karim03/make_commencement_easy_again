@@ -428,15 +428,23 @@
 
         // Create confetti effect
         function createConfetti() {
-            for (let i = 0; i < 50; i++) {
+            for (let i = 0; i < 60; i++) {
                 const confetti = document.createElement('div');
                 confetti.className = 'confetti';
+                const size = Math.random() * 8 + 8;
+                confetti.style.width = `${size}px`;
+                confetti.style.height = `${size}px`;
                 confetti.style.left = Math.random() * 100 + 'vw';
-                confetti.style.animationDelay = Math.random() * 3 + 's';
-                confetti.style.backgroundColor = ['#667eea', '#764ba2', '#48bb78', '#ed8936'][Math.floor(Math.random() * 4)];
+                confetti.style.backgroundColor = [
+                    '#667eea', '#764ba2', '#48bb78', '#ed8936', '#f56565', '#f6e05e', '#4299e1', '#ed64a6', '#38b2ac', '#ecc94b'
+                ][Math.floor(Math.random() * 10)];
+                confetti.style.opacity = Math.random() * 0.5 + 0.5;
+                confetti.style.borderRadius = `${Math.random() * 50}%`;
+                confetti.style.animationDelay = (Math.random() * 0.5) + 's';
+                confetti.style.animationDuration = (Math.random() * 1.5 + 1.5) + 's';
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
                 document.body.appendChild(confetti);
-                
-                setTimeout(() => confetti.remove(), 3000);
+                setTimeout(() => confetti.remove(), 2500);
             }
         }
 
@@ -536,18 +544,13 @@
                 resultDiv.innerHTML = `<span class='checkmark'><i class='fa-solid fa-circle-check'></i></span> <b>${obj.Name}</b><br><b>${obj.Major}</b>`;
                 speakText = `${obj.Name}. ${obj.Major}.`;
                 isSuccess = true;
-                
                 // Add success animation
                 resultDiv.classList.add('success');
                 playSuccessSound();
-                
-                // Create confetti for successful scan
-                createConfetti();
-                
+                // (No confetti here)
             } catch (e) {
                 resultDiv.textContent = decodedText;
             }
-            
             // Speak the result with enhanced voice feedback
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
@@ -557,7 +560,6 @@
                 utter.rate = 0.9;
                 utter.pitch = 1.1;
                 utter.volume = 1.0;
-                
                 const voices = window.speechSynthesis.getVoices();
                 const preferredVoices = voices.filter(v =>
                     (v.lang && v.lang.toLowerCase().includes('en-us')) &&
@@ -567,7 +569,6 @@
                      v.name.toLowerCase().includes('google us english') ||
                      v.gender === 'female')
                 );
-                
                 if (preferredVoices.length > 0) {
                     utter.voice = preferredVoices[0];
                 } else if (voices.length > 0) {
@@ -576,32 +577,28 @@
                         utter.voice = enUSVoices[0];
                     }
                 }
-                
                 // Enhanced voice events
                 utter.onstart = function() {
                     voiceMemo.innerHTML = '<i class="fa-solid fa-microphone"></i> Speaking student information...';
                     voiceMemo.style.background = 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)';
                 };
-                
                 utter.onend = function() {
                     voiceMemo.innerHTML = '<i class="fa-solid fa-check"></i> Information read successfully!';
                     voiceMemo.style.background = 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)';
-                    
+                    // Confetti celebration only after reading is done
+                    if (isSuccess) createConfetti();
                     // Hide voice memo after 2 seconds
                     setTimeout(() => {
                         voiceMemo.style.display = 'none';
                     }, 2000);
                 };
-                
                 utter.onerror = function() {
                     voiceMemo.innerHTML = '<i class="fa-solid fa-exclamation-triangle"></i> Voice error occurred';
                     voiceMemo.style.background = 'linear-gradient(135deg, #f56565 0%, #e53e3e 100%)';
-                    
                     setTimeout(() => {
                         voiceMemo.style.display = 'none';
                     }, 2000);
                 };
-                
                 window.speechSynthesis.speak(utter);
             } else {
                 // Fallback if speech synthesis is not available
