@@ -43,7 +43,6 @@ Thumbs.db
 
 # Generated QR codes (optional - remove if you want to include them)
 qr_codes/
-*.png
 *.zip
 
 # Logs
